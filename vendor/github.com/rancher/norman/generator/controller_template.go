@@ -8,6 +8,7 @@ import (
 	{{.importPackage}}
 	"github.com/rancher/norman/objectclient"
 	"github.com/rancher/norman/controller"
+	"github.com/rancher/norman/resource"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -34,7 +35,17 @@ var (
 {{- end }}
 		Kind:         {{.schema.CodeName}}GroupVersionKind.Kind,
 	}
+
+	{{.schema.CodeName}}GroupVersionResource = schema.GroupVersionResource{
+		Group:     GroupName,
+		Version:   Version,
+		Resource:  "{{.schema.PluralName | toLower}}",
+	}
 )
+
+func init() {
+	resource.Put({{.schema.CodeName}}GroupVersionResource)
+}
 
 func New{{.schema.CodeName}}(namespace, name string, obj {{.prefix}}{{.schema.CodeName}}) *{{.prefix}}{{.schema.CodeName}} {
 	obj.APIVersion, obj.Kind = {{.schema.CodeName}}GroupVersionKind.ToAPIVersionAndKind()
@@ -46,7 +57,7 @@ func New{{.schema.CodeName}}(namespace, name string, obj {{.prefix}}{{.schema.Co
 type {{.schema.CodeName}}List struct {
 	metav1.TypeMeta   %BACK%json:",inline"%BACK%
 	metav1.ListMeta   %BACK%json:"metadata,omitempty"%BACK%
-	Items             []{{.prefix}}{{.schema.CodeName}}
+	Items             []{{.prefix}}{{.schema.CodeName}} %BACK%json:"items"%BACK%
 }
 
 type {{.schema.CodeName}}HandlerFunc func(key string, obj *{{.prefix}}{{.schema.CodeName}}) (runtime.Object, error)
